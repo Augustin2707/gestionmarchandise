@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des marchandises</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'attente': '#F59E0B',
+                        'transit': '#3B82F6',
+                        'livree': '#10B981',
+                        'retardee': '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .statut-badge {
+            @apply px-3 py-1 text-xs font-semibold rounded-full;
+        }
+        .action-btn {
+            @apply p-2 rounded-md transition-colors;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <!-- En-tête avec titre et bouton d'ajout -->
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-boxes mr-2 text-blue-600"></i>
+                    Liste des Marchandises
+                </h1>
+                <div class="flex space-x-3">
+                    <a href="/" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-home mr-1"></i> Accueil
+                    </a>
+                    <a href="/ajouter" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus-circle mr-2"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tableau des marchandises -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Poids</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expédition</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Arrivée</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% resultat.forEach(function(marchandise) { %>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <%= marchandise.id %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <i class="fas fa-box-open mr-2 text-gray-400"></i>
+                                <%= marchandise.type_marchandise %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= marchandise.poids %> kg
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    <%= marchandise.destination %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <i class="far fa-calendar-alt mr-1 text-gray-400"></i>
+                                <%= marchandise.date_expedition.toISOString().split('T')[0] %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <i class="far fa-calendar-check mr-1 text-gray-400"></i>
+                                <%= marchandise.date_arrivee_prevue.toISOString().split('T')[0] %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <% const statutClass = {
+                                    'En attente': 'bg-attente-100 text-attente-800',
+                                    'En transit': 'bg-transit-100 text-transit-800',
+                                    'Livrée': 'bg-livree-100 text-livree-800',
+                                    'Retardée': 'bg-retardee-100 text-retardee-800'
+                                }[marchandise.statut] || 'bg-gray-100 text-gray-800' %>
+                                <span class="statut-badge <%= statutClass %>">
+                                    <i class="fas <%= {
+                                        'En attente': 'fa-clock',
+                                        'En transit': 'fa-truck',
+                                        'Livrée': 'fa-check-circle',
+                                        'Retardée': 'fa-exclamation-triangle'
+                                    }[marchandise.statut] || 'fa-info-circle' %> mr-1"></i>
+                                    <%= marchandise.statut %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                   <!-- Bouton Modifier -->
+                                    <a href="/modification?id=<%= marchandise.id %>" 
+                                                                    class="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors mr-2"
+                                    title="Modifier">
+                                    <i class="fas fa-pencil-alt mr-2"></i>
+                                    <span class="text-sm font-medium">Modifier</span>
+                                </a>
+                                
+                                <!-- Bouton Supprimer -->
+                                    <a href="/suppression?id=<%= marchandise.id %>" 
+                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette marchandise ?')"
+                                        class="flex items-center px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                        title="Supprimer">
+                                        <i class="fas fa-trash-alt mr-2"></i>
+                                        <span class="text-sm font-medium">Supprimer</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pied de tableau -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Total: <%= resultat.length %> marchandise(s)
+                </div>
+               
+            </div>
+        </div>
+    </div>
+</body>
+</html>
